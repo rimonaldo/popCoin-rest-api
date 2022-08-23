@@ -1,77 +1,40 @@
-
-const dbService = require('../../services/db.service')
-const logger = require('../../services/logger.service')
-const ObjectId = require('mongodb').ObjectId
-
+const dbService = require("../../services/db.service");
+const logger = require("../../services/logger.service");
+const ObjectId = require("mongodb").ObjectId;
+const EC = require("elliptic").ec;
+const ec = new EC("secp256k1");
 module.exports = {
-    query,
-    getById,
-    getByUsername,
-    remove,
-    update,
-    add
+  getWalletAddress,
+};
+
+async function getWalletAddress(privateKey) {
+    const myKey = ec.keyFromPrivate(privateKey)
+    return myKey.getPublic('hex')
 }
 
-async function query(filterBy = {}) {
-    const criteria = _buildCriteria(filterBy)
+
+async function _createWallet(transaction,wallet) {
     try {
+        // peek only updatable fields!
+        const userToAdd = {
+            username: user.username,
+            password: user.password,
+            privateKey: user.privateKey
+        }
         const collection = await dbService.getCollection('user')
-        var users = await collection.find(criteria).toArray()
-        users = users.map(user => {
-            delete user.password
-            user.createdAt = ObjectId(user._id).getTimestamp()
-            // Returning fake fresh data
-            // user.createdAt = Date.now() - (1000 * 60 * 60 * 24 * 3) // 3 days ago
-            return user
-        })
-        return users
+        await collection.insertOne(userToAdd)
+        return userToAdd
     } catch (err) {
-        logger.error('cannot find users', err)
+        logger.error('cannot insert user', err)
         throw err
     }
 }
 
-async function getById(userId) {
-    try {
-        const collection = await dbService.getCollection('user')
-        console.log(userId);
-        const user = await collection.findOne({ _id: ObjectId(userId) })
-        delete user.password
-
-     
-
-        return user
-    } catch (err) {
-        logger.error(`while finding user by id: ${userId}`, err)
-        throw err
-    }
-}
-async function getByUsername(username) {
-    try {
-        const collection = await dbService.getCollection('user')
-        const user = await collection.findOne({ username })
-        return user
-    } catch (err) {
-        logger.error(`while finding user by username: ${username}`, err)
-        throw err
-    }
-}
-
-async function remove(userId) {
-    try {
-        const collection = await dbService.getCollection('user')
-        await collection.deleteOne({ '_id': ObjectId(userId) })
-    } catch (err) {
-        logger.error(`cannot remove user ${userId}`, err)
-        throw err
-    }
-}
-
-async function update(user) {
+async function updateWallet(transaction, wallet) {
     try {
         // peek only updatable properties
         const userToSave = {
-            _id: ObjectId(user._id), // needed for the returnd obj
+            _id: ObjectId(wallet._id), // needed for the returnd obj
             fullname: user.fullname,
             score: user.score,
         }
@@ -83,42 +46,3 @@ async function update(user) {
         throw err
     }
 }
-
-async function add(user) {
-    try {
-        // peek only updatable fields!
-        const userToAdd = {
-            username: user.username,
-            password: user.password,
-        }
-        const collection = await dbService.getCollection('user')
-        await collection.insertOne(userToAdd)
-        return userToAdd
-    } catch (err) {
-        logger.error('cannot insert user', err)
-        throw err
-    }
-}
-
-function _buildCriteria(filterBy) {
-    const criteria = {}
-    if (filterBy.txt) {
-        const txtCriteria = { $regex: filterBy.txt, $options: 'i' }
-        criteria.$or = [
-            {
-                username: txtCriteria
-            },
-            {
-                fullname: txtCriteria
-            }
-        ]
-    }
-    if (filterBy.minBalance) {
-        criteria.score = { $gte: filterBy.minBalance }
-    }
-    return criteria
-}
-
-
-
-

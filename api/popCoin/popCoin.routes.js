@@ -1,6 +1,6 @@
 const express = require('express')
-// const {requireAuth, requireAdmin} = require('../../middlewares/requireAuth.middleware')
-const {getUser, getUsers, deleteUser, updateUser} = require('./popCoin.controller')
+const {requireAuth, requireAdmin} = require('../../middlewares/requireAuth.middleware')
+const {sendCoins, getWallet,} = require('./popCoin.controller')
 const router = express.Router()
 
 // middleware that is specific to this router
@@ -10,7 +10,8 @@ const router = express.Router()
 // router.get('/:id', getUser)
 // router.put('/:id', requireAuth,  updateUser)
 // router.delete('/:id',  requireAuth, requireAdmin, deleteUser)
-
+router.get('/wallet',getWallet)
+router.post('/transaction',sendCoins)
 
 
 module.exports = router

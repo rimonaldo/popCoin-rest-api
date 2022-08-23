@@ -4,14 +4,17 @@ const userService = require('../user/user.service')
 const logger = require('../../services/logger.service')
 const cryptr = new Cryptr(process.env.SECRET1 || 'Secret-Puk-1234')
 
+const EC = require("elliptic").ec;
+const ec = new EC("secp256k1");
+
 async function login(username, password) {
     logger.debug(`auth.service - login with username: ${username}`)
 
     const user = await userService.getByUsername(username)
     if (!user) return Promise.reject('Invalid username or password')
     // TODO: un-comment for real login
-    // const match = await bcrypt.compare(password, user.password)
-    // if (!match) return Promise.reject('Invalid username or password')
+    const match = await bcrypt.compare(password, user.password)
+    if (!match) return Promise.reject('Invalid username or password')
 
     delete user.password
     user._id = user._id.toString()
@@ -24,6 +27,8 @@ async function login(username, password) {
 // })()
     
 
+
+
 async function signup({username, password}) {
     const saltRounds = 10
 
@@ -34,7 +39,10 @@ async function signup({username, password}) {
     if (userExist) return Promise.reject('Username already taken')
 
     const hash = await bcrypt.hash(password, saltRounds)
-    return userService.add({ username, password: hash})
+
+    const key = ec.genKeyPair();
+    const privateKey = key.getPrivate("hex");
+    return userService.add({ username, password: hash,privateKey})
 }
 
 

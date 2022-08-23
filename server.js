@@ -6,6 +6,8 @@ const path = require('path')
 const app = express()
 const http = require('http').createServer(app)
 
+
+
 // Express App Config
 app.use(cookieParser())
 app.use(express.json())
@@ -39,9 +41,9 @@ const {setupSocketAPI} = require('./services/socket.service')
 const setupAsyncLocalStorage = require('./middlewares/setupAls.middleware')
 app.all('*', setupAsyncLocalStorage)
 
+app.use('/api/popCoin', popCoinRoutes)
 app.use('/api/auth', authRoutes)
 app.use('/api/user', userRoutes)
-app.use('/api/popCoin', popCoinRoutes)
 setupSocketAPI(http)
 
 // Make every server-side-route to match the index.html
