@@ -90,7 +90,10 @@ async function add(user) {
         const userToAdd = {
             username: user.username,
             password: user.password,
-            privateKey: user.privateKey
+            privateKey: user.privateKey,
+            email: `${user.username}@renovize.com`,
+            phone: "+1 (968) 593-3824",
+            moves:[]
         }
         const collection = await dbService.getCollection('user')
         await collection.insertOne(userToAdd)
