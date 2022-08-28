@@ -36,9 +36,9 @@ const userRoutes = require("./api/user/user.routes");
 const popCoinRoutes = require("./api/blockchain/blockchain.routes");
 const minerRoutes = require("./api/miner/miner.routes");
 const { setupSocketAPI } = require("./services/socket.service");
+const setupAsyncLocalStorage = require("./middlewares/setupAls.middleware");
 
 // routes
-const setupAsyncLocalStorage = require("./middlewares/setupAls.middleware");
 app.all('*', setupAsyncLocalStorage)
 app.set('trust proxy', 1)
 app.use("/api/popCoin", popCoinRoutes);

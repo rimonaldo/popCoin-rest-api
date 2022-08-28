@@ -3,9 +3,9 @@ const {requireAuth, requireAdmin} = require('../../middlewares/requireAuth.middl
 const {addTransaction, getWallet,postWallet,postBlockchain,minePending,validateChain} = require('./blockchain.controller')
 const router = express.Router()
 
-router.get('/wallet',getWallet)
+router.get('/wallet/:privateKey',getWallet)
 router.post('/wallet',requireAuth,postWallet)
-router.post('/transaction',requireAuth,addTransaction)
+router.post('/transaction',addTransaction)
 router.post('/mine',requireAuth,minePending)
 
 
